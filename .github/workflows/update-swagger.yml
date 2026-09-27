@@ -81,7 +81,7 @@ jobs:
 
           # Crear el Pull Request usando la GitHub CLI (gh)
           gh pr create \
-            --base master \
+            --base main \
             --head "$BRANCH_NAME" \
             --title "Update SwaggerUI to $RELEASE_TAG" \
             --body "Updates [swagger-ui](https://github.com/swagger-api/swagger-ui) to $RELEASE_TAG.
