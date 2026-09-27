@@ -37,21 +37,21 @@ jobs:
           SWAGGER_YAML: "swagger.yaml"
         run: |
           # Delete the dist directory and index.html
-          rm -fr dist index.html
+          rm -fr dist index.html          
           
-          # Download the release
-          curl -sL -o $RELEASE_TAG https://api.github.com/repos/swagger-api/swagger-ui/tarball/$RELEASE_TAG
+          # Download the release as a zip file
+          curl -sL -o swagger-ui.zip https://github.com/swagger-api/swagger-ui/archive/refs/tags/$RELEASE_TAG.zip
           
-          # Extract only the dist directory (which already includes index.html)
-          tar -xzf $RELEASE_TAG --wildcards '*/dist'
+          # Extract the zip file quietly
+          unzip -q swagger-ui.zip
           
-          # Move index.html to the root and keep dist
-          mv */dist ./dist
+          # Move the dist directory to root and then move index.html out to root
+          mv swagger-ui-*/dist .
           mv dist/index.html .
           
-          # Clean up the downloaded tarball and temporary extracted folder
-          rm $RELEASE_TAG
-          rm -fr swagger-api-swagger-ui-*
+          # Clean up the downloaded zip and temporary extracted folder
+          rm swagger-ui.zip
+          rm -fr swagger-ui-*
           
           # Fix references in dist/ and index.html
           find dist/ -type f -name "*.js" -exec sed -i "s|https://petstore.swagger.io/v2/swagger.json|$SWAGGER_YAML|g" {} +
