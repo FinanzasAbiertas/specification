@@ -46,8 +46,8 @@ jobs:
           unzip -q swagger-ui.zip
           
           # Move the dist directory to root and then move index.html out to root
-          mv swagger-ui-*/dist .
-          mv dist/index.html .
+          cp -Rf swagger-ui-*/dist .
+          cp -Rf dist/index.html .
           
           # Clean up the downloaded zip and temporary extracted folder
           rm swagger-ui.zip
