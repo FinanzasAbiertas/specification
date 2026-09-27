@@ -36,22 +36,32 @@ jobs:
           RELEASE_TAG: ${{ steps.swagger-ui.outputs.release_tag }}
           SWAGGER_YAML: "swagger.yaml"
         run: |
-          # Delete the dist directory and index.html
+          # 1. Eliminar archivos antiguos de la versión previa
           rm -fr dist index.html
-          # Download the release
-          curl -sL -o $RELEASE_TAG https://api.github.com/repos/swagger-api/swagger-ui/tarball/$RELEASE_TAG
-          # Extract the dist directory
-          tar -xzf $RELEASE_TAG --strip-components=1 $(tar -tzf $RELEASE_TAG | head -1 | cut -f1 -d"/")/dist
-          rm $RELEASE_TAG
-          # Move index.html to the root
+          
+          # 2. Descargar el código fuente de la release en formato zip (más estable que el tarball comprimido con pipes complejos)
+          curl -sL -o swagger-ui.zip https://github.com/swagger-api/swagger-ui/archive/refs/tags/$RELEASE_TAG.zip
+          
+          # 3. Descomprimir el archivo zip
+          unzip -q swagger-ui.zip
+          
+          # 4. Mover la carpeta dist y el index.html desde la carpeta descomprimida (ej. swagger-ui-5.33.0/dist)
+          mv swagger-ui-*/dist .
           mv dist/index.html .
-          # Fix references in dist/swagger-initializer and index.html
-          sed -i "s|https://petstore.swagger.io/v2/swagger.json|$SWAGGER_YAML|g" dist/swagger-initializer.js
+          
+          # 5. Limpiar el archivo zip descargado
+          rm swagger-ui.zip
+          
+          # 6. Reemplazar la URL de petstore en cualquier archivo .js dentro de dist/ de forma segura
+          find dist/ -type f -name "*.js" -exec sed -i "s|https://petstore.swagger.io/v2/swagger.json|$SWAGGER_YAML|g" {} +
+          
+          # 7. Ajustar rutas relativas en el index.html raíz
           sed -i "s|href=\"./|href=\"dist/|g" index.html
           sed -i "s|src=\"./|src=\"dist/|g" index.html
           sed -i "s|href=\"index|href=\"dist/index|g" index.html
-          # Update current release
-          echo ${{ steps.swagger-ui.outputs.release_tag }} > swagger-ui.version
+          
+          # 8. Actualizar el archivo de versión local
+          echo "$RELEASE_TAG" > swagger-ui.version
 
       - name: Create Pull Request Natively
         if: steps.swagger-ui.outputs.current_tag != steps.swagger-ui.outputs.release_tag
