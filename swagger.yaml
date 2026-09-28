@@ -47,7 +47,6 @@ components:
           type: integer
           example: 1
         nombre:
-          type: nombre
           type: string
           example: "Ana Pérez"
 
